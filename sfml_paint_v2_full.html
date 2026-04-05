@@ -1,0 +1,521 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+#app{display:flex;flex-direction:column;height:720px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-tertiary)}
+#tb1,#tb2{display:flex;align-items:center;gap:1px;padding:3px 6px;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);flex-wrap:wrap}
+.g{display:flex;align-items:center;gap:1px;padding:0 4px;border-right:0.5px solid var(--color-border-tertiary)}.g:last-child{border-right:none}
+.tb{width:27px;height:25px;border:0.5px solid transparent;border-radius:4px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--color-text-secondary);flex-shrink:0}
+.tb:hover{background:var(--color-background-primary);border-color:var(--color-border-secondary)}
+.tb.act{background:var(--color-background-primary);border-color:var(--color-border-primary);color:var(--color-text-primary)}
+.lbl{font-size:9px;color:var(--color-text-secondary);padding:0 2px;white-space:nowrap}
+#main{display:flex;flex:1;overflow:hidden}
+#ca{flex:1;overflow:auto;background:#999;background-image:linear-gradient(45deg,#aaa 25%,transparent 25%),linear-gradient(-45deg,#aaa 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#aaa 75%),linear-gradient(-45deg,transparent 75%,#aaa 75%);background-size:14px 14px;background-position:0 0,0 7px,7px -7px,-7px 0;padding:10px;display:flex;align-items:flex-start}
+#cw{position:relative;display:inline-block}
+#cv{display:block;cursor:crosshair;background:white}
+#gc{position:absolute;top:0;left:0;pointer-events:none}
+#ti{position:absolute;display:none;background:rgba(255,255,255,.9);border:1.5px solid #378ADD;outline:none;font-size:16px;padding:2px 4px;min-width:80px;z-index:10}
+#rp{width:265px;background:var(--color-background-secondary);border-left:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;overflow:hidden}
+#rt{display:flex;border-bottom:0.5px solid var(--color-border-tertiary)}
+.rt{flex:1;padding:5px;font-size:10px;text-align:center;cursor:pointer;color:var(--color-text-secondary);border-bottom:2px solid transparent}
+.rt.act{color:var(--color-text-primary);border-bottom-color:#378ADD}
+#co{flex:1;overflow:auto;padding:7px 9px;font-family:var(--font-mono);font-size:10px;line-height:1.5;color:var(--color-text-primary);white-space:pre;display:flex;flex-direction:column}
+#ol{flex:1;overflow:auto;padding:4px}
+#ra{padding:5px 8px;border-top:0.5px solid var(--color-border-tertiary);display:flex;gap:4px}
+.rb{flex:1;font-size:10px;padding:4px;border-radius:4px;border:0.5px solid var(--color-border-secondary);cursor:pointer;background:transparent;color:var(--color-text-secondary)}
+.rb:hover{background:var(--color-background-primary)}
+#sb{padding:3px 8px;background:var(--color-background-secondary);border-top:0.5px solid var(--color-border-tertiary);display:flex;gap:12px;font-size:10px;color:var(--color-text-secondary)}
+.c-kw{color:#7F77DD}.c-ty{color:#0F6E56}.c-fn{color:#185FA5}.c-str{color:#993C1D}.c-cm{color:#888780}.c-nm{color:#BA7517}
+#picker-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.55);z-index:100;display:none;align-items:center;justify-content:center}
+#picker-dialog{background:var(--color-background-secondary);border:1px solid var(--color-border-primary);border-radius:8px;width:640px;padding:14px;display:flex;flex-direction:column;gap:10px}
+#picker-top{display:flex;gap:12px}
+#picker-left{display:flex;flex-direction:column;gap:6px}
+.pd-lbl{font-size:10px;color:var(--color-text-secondary)}
+#basic-grid{display:flex;flex-wrap:wrap;gap:3px;width:260px}
+.bsw{width:26px;height:26px;border-radius:3px;border:0.5px solid rgba(0,0,0,.25);cursor:pointer;flex-shrink:0}
+.bsw:hover{outline:2px solid var(--color-border-primary)}
+#custom-grid{display:flex;flex-wrap:wrap;gap:3px;width:260px}
+.csw{width:26px;height:26px;border-radius:3px;border:1px dashed var(--color-border-secondary);cursor:pointer;flex-shrink:0}
+.csw:hover{outline:2px solid var(--color-border-primary)}
+#picker-right{display:flex;gap:8px;flex-direction:column}
+#picker-grad-wrap{position:relative;width:220px;height:220px;cursor:crosshair}
+#picker-grad{width:220px;height:220px;border-radius:4px;display:block}
+#grad-cursor{position:absolute;width:12px;height:12px;border-radius:50%;border:2px solid white;outline:1px solid rgba(0,0,0,.5);pointer-events:none;transform:translate(-50%,-50%)}
+#hue-wrap{position:relative;height:220px;width:18px}
+#hue-canvas{width:18px;height:220px;border-radius:3px;cursor:pointer}
+#hue-cursor{position:absolute;left:-3px;width:24px;height:3px;background:rgba(0,0,0,.8);pointer-events:none;transform:translateY(-50%)}
+#bri-wrap{position:relative;height:220px;width:14px}
+#bri-canvas{width:14px;height:220px;border-radius:3px;cursor:pointer}
+#picker-bottom{display:flex;gap:10px;align-items:flex-start}
+#color-preview{width:80px;height:56px;border-radius:4px;border:0.5px solid var(--color-border-secondary);flex-shrink:0}
+#picker-fields{display:flex;flex-wrap:wrap;gap:6px 14px;flex:1}
+.pf{display:flex;align-items:center;gap:4px}
+.pf label{font-size:10px;color:var(--color-text-secondary);min-width:36px}
+.pf input{width:46px;font-size:10px;padding:2px 4px;border:0.5px solid var(--color-border-secondary);border-radius:3px;background:var(--color-background-primary);color:var(--color-text-primary)}
+#picker-actions{display:flex;gap:6px;align-items:center;margin-top:2px}
+.pact{padding:5px 14px;font-size:11px;border-radius:4px;cursor:pointer;border:0.5px solid var(--color-border-secondary)}
+#btn-ok{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+#btn-cancel{background:transparent;color:var(--color-text-secondary)}
+#btn-add{background:transparent;color:var(--color-text-secondary);font-size:10px}
+input[type=range]{width:52px}
+</style>
+
+<div id="app">
+<div id="tb1">
+  <div class="g">
+    <button class="tb act" id="t-select" onclick="setTool('select')" title="Select">&#9654;</button>
+    <button class="tb" id="t-pencil" onclick="setTool('pencil')" title="Pencil">&#9998;</button>
+    <button class="tb" id="t-bucket" onclick="setTool('bucket')" title="Fill Bucket">&#9618;</button>
+    <button class="tb" id="t-eraser" onclick="setTool('eraser')" title="Eraser">&#9003;</button>
+    <button class="tb" id="t-text" onclick="setTool('text')" title="Text" style="font-weight:500">T</button>
+  </div>
+  <div class="g">
+    <button class="tb" id="t-line" onclick="setTool('line')" title="Line">&#47;</button>
+    <button class="tb" id="t-rect" onclick="setTool('rect')" title="Rect">&#9645;</button>
+    <button class="tb" id="t-rrect" onclick="setTool('rrect')" title="Rounded Rect" style="font-size:11px">&#9632;&#8239;</button>
+    <button class="tb" id="t-circle" onclick="setTool('circle')" title="Ellipse">&#9675;</button>
+    <button class="tb" id="t-triangle" onclick="setTool('triangle')" title="Triangle">&#9651;</button>
+    <button class="tb" id="t-rtriangle" onclick="setTool('rtriangle')" title="Right Triangle">&#9663;</button>
+  </div>
+  <div class="g">
+    <button class="tb" id="t-pentagon" onclick="setTool('pentagon')" title="Pentagon">&#11200;</button>
+    <button class="tb" id="t-hexagon" onclick="setTool('hexagon')" title="Hexagon">&#11203;</button>
+    <button class="tb" id="t-octagon" onclick="setTool('octagon')" title="Octagon">&#11201;</button>
+    <button class="tb" id="t-star" onclick="setTool('star')" title="Star 5pt">&#9733;</button>
+    <button class="tb" id="t-star6" onclick="setTool('star6')" title="Star 6pt">&#10022;</button>
+  </div>
+  <div class="g">
+    <button class="tb" id="t-arrow" onclick="setTool('arrow')" title="Arrow">&#10140;</button>
+    <button class="tb" id="t-parallelogram" onclick="setTool('parallelogram')" title="Parallelogram">&#9700;</button>
+    <button class="tb" id="t-diamond" onclick="setTool('diamond')" title="Diamond">&#9670;</button>
+    <button class="tb" id="t-cross" onclick="setTool('cross')" title="Cross">&#10010;</button>
+    <button class="tb" id="t-heart" onclick="setTool('heart')" title="Heart">&#10084;</button>
+    <button class="tb" id="t-semicircle" onclick="setTool('semicircle')" title="Semicircle">&#9681;</button>
+    <button class="tb" id="t-arc" onclick="setTool('arc')" title="Arc">&#9680;</button>
+  </div>
+</div>
+<div id="tb2">
+  <div class="g" style="gap:4px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+      <div style="font-size:9px;color:var(--color-text-secondary)">Stroke</div>
+      <div id="sc-box" style="width:30px;height:30px;border-radius:4px;border:2px solid var(--color-border-primary);background:#1a1a1a;cursor:pointer" onclick="openPicker('stroke')"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+      <div style="font-size:9px;color:var(--color-text-secondary)">Fill</div>
+      <div id="fc-box" style="width:30px;height:30px;border-radius:4px;border:1px solid var(--color-border-secondary);background:#ffffff;cursor:pointer" onclick="openPicker('fill')"></div>
+    </div>
+  </div>
+  <div class="g">
+    <div id="quickpal" style="display:flex;flex-wrap:wrap;gap:2px;width:160px"></div>
+  </div>
+  <div class="g">
+    <span class="lbl">Sz:</span><input type="range" id="sz" min="1" max="20" value="2" step="1" style="width:50px" oninput="strokeSz=+this.value;document.getElementById('szv').textContent=this.value">
+    <span id="szv" style="font-size:10px;min-width:14px;color:var(--color-text-secondary)">2</span>
+  </div>
+  <div class="g">
+    <span class="lbl">Opacity:</span><input type="range" id="op" min="10" max="100" value="100" step="1" style="width:50px" oninput="opVal=+this.value/100;document.getElementById('opv').textContent=this.value+'%'">
+    <span id="opv" style="font-size:10px;min-width:28px;color:var(--color-text-secondary)">100%</span>
+  </div>
+  <div class="g">
+    <span class="lbl">Blend:</span>
+    <select id="blendsel" style="font-size:10px;padding:2px 2px" onchange="blendMode=this.value">
+      <option value="source-over">Normal</option>
+      <option value="multiply">Multiply</option>
+      <option value="screen">Screen</option>
+      <option value="lighter">Add/Lighten</option>
+      <option value="overlay">Overlay</option>
+      <option value="darken">Darken</option>
+      <option value="color-dodge">Dodge</option>
+      <option value="color-burn">Burn</option>
+      <option value="hard-light">Hard Light</option>
+      <option value="soft-light">Soft Light</option>
+      <option value="difference">Difference</option>
+      <option value="exclusion">Exclusion</option>
+      <option value="hue">Hue</option>
+      <option value="saturation">Saturation</option>
+      <option value="color">Color</option>
+      <option value="luminosity">Luminosity</option>
+    </select>
+  </div>
+  <div class="g">
+    <button class="tb" id="fill-tog" onclick="toggleFill()" style="font-size:10px;width:auto;padding:0 5px">Fill:OFF</button>
+    <span class="lbl">|</span>
+    <button class="tb" onclick="toggleGrid()" style="font-size:10px;width:auto;padding:0 4px" id="grid-tog">Grid:OFF</button>
+  </div>
+  <div class="g">
+    <button class="tb" onclick="zoom(-0.1)" style="font-size:14px">&#8722;</button>
+    <span id="zv" style="font-size:10px;min-width:30px;text-align:center;color:var(--color-text-secondary)">100%</span>
+    <button class="tb" onclick="zoom(0.1)" style="font-size:14px">&#43;</button>
+  </div>
+  <div class="g">
+    <button class="tb" onclick="undoLast()" title="Undo" style="font-size:14px">&#8617;</button>
+    <button class="tb" onclick="clearAll()" title="Clear" style="color:#a32d2d;font-size:12px">&#128465;</button>
+  </div>
+</div>
+
+<div id="main">
+  <div id="ca">
+    <div id="cw">
+      <canvas id="cv" width="700" height="520"></canvas>
+      <canvas id="gc" width="700" height="520"></canvas>
+      <input id="ti" type="text" placeholder="Type..." onblur="commitText()" onkeydown="if(event.key==='Enter')commitText()">
+    </div>
+  </div>
+  <div id="rp">
+    <div id="rt">
+      <div class="rt act" onclick="switchTab('code')">SFML Code</div>
+      <div class="rt" onclick="switchTab('obj')">Objects</div>
+    </div>
+    <div id="co"><span style="color:var(--color-text-secondary);font-style:italic">// Draw shapes — SFML code here!</span></div>
+    <div id="ol" style="display:none"></div>
+    <div id="ra">
+      <button class="rb" onclick="copyCode()">Copy</button>
+      <button class="rb" onclick="downloadCode()">Save .cpp</button>
+      <button class="rb" onclick="clearAll()" style="color:#a32d2d">Clear</button>
+    </div>
+  </div>
+</div>
+<div id="sb">
+  <span id="st-tool">Tool: select</span>
+  <span id="st-pos">x:0 y:0</span>
+  <span id="st-obj">0 objects</span>
+  <span id="st-blend">Blend: Normal</span>
+</div>
+</div>
+
+<div id="picker-overlay">
+<div id="picker-dialog">
+  <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px">Edit Colors</div>
+  <div id="picker-top">
+    <div id="picker-left">
+      <div class="pd-lbl">Basic colors:</div>
+      <div id="basic-grid"></div>
+      <div class="pd-lbl" style="margin-top:6px">Custom colors:</div>
+      <div id="custom-grid"></div>
+    </div>
+    <div id="picker-right" style="gap:6px">
+      <div style="display:flex;gap:6px">
+        <div id="picker-grad-wrap">
+          <canvas id="picker-grad"></canvas>
+          <div id="grad-cursor"></div>
+        </div>
+        <div style="display:flex;gap:4px">
+          <div id="hue-wrap"><canvas id="hue-canvas"></canvas><div id="hue-cursor"></div></div>
+          <div id="bri-wrap"><canvas id="bri-canvas"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="picker-bottom">
+    <div id="color-preview"></div>
+    <div id="picker-fields">
+      <div class="pf"><label>Hue:</label><input type="number" id="pf-h" min="0" max="360" oninput="pickerFromHSL()"></div>
+      <div class="pf"><label>Sat:</label><input type="number" id="pf-s" min="0" max="240" oninput="pickerFromHSL()"></div>
+      <div class="pf"><label>Lum:</label><input type="number" id="pf-l" min="0" max="240" oninput="pickerFromHSL()"></div>
+      <div class="pf"><label>Red:</label><input type="number" id="pf-r" min="0" max="255" oninput="pickerFromRGB()"></div>
+      <div class="pf"><label>Green:</label><input type="number" id="pf-g" min="0" max="255" oninput="pickerFromRGB()"></div>
+      <div class="pf"><label>Blue:</label><input type="number" id="pf-b" min="0" max="255" oninput="pickerFromRGB()"></div>
+    </div>
+  </div>
+  <div id="picker-actions">
+    <button class="pact" id="btn-ok" onclick="pickerOK()">OK</button>
+    <button class="pact" id="btn-cancel" onclick="closePicker()">Cancel</button>
+    <button class="pact" id="btn-add" onclick="addCustomColor()">Add to Custom Colors</button>
+    <div id="color-solid-lbl" style="font-size:10px;color:var(--color-text-secondary);margin-left:auto">Color|Solid</div>
+  </div>
+</div>
+</div>
+
+<script>
+const cv=document.getElementById('cv');
+const ctx=cv.getContext('2d');
+const gc=document.getElementById('gc');
+const gctx=gc.getContext('2d');
+const ti=document.getElementById('ti');
+const cw=document.getElementById('cw');
+const pickerOverlay=document.getElementById('picker-overlay');
+
+let tool='select',strokeColor='#1a1a1a',fillColor='#ffffff';
+let strokeSz=2,opVal=1,fillMode=false,blendMode='source-over',showGrid=false,zoomLevel=1;
+let drawing=false,startX=0,startY=0,pencilPts=[],selectedObj=null,dragOff=null;
+let objects=[],textPending=null;
+let pickerFor='stroke',pickerH=0,pickerS=1,pickerL=0.5;
+let gradDrag=false,hueDrag=false;
+
+const basicColors=['#ffafaf','#ffffaf','#c8ffc8','#00ff00','#c8ffff','#0000ff','#ffafff','#e8e8ff',
+  '#ff0000','#ffff00','#80ff00','#00c000','#00ffff','#8080ff','#ff00ff','#808040',
+  '#804040','#ff8040','#00ff80','#004040','#8080ff','#8000ff','#ff0080','#ff4040',
+  '#800000','#ff8000','#008000','#004000','#000080','#000040','#800080','#400040',
+  '#804000','#404000','#008080','#000000','#808080','#c0c0c0','#400000','#ffffff'];
+let customColors=Array(16).fill('#ffffff');
+
+const quickPalColors=['#1a1a1a','#ffffff','#e24b4a','#378add','#1d9e75','#ef9f27','#7f77dd','#d4537e','#5dcaa5','#f09595','#ba7517','#3b6d11','#ff8040','#0080ff','#8000ff','#ff00ff'];
+
+function hexToRgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return{r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)};}
+function rgbToHex(r,g,b){return'#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');}
+function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;let mx=Math.max(r,g,b),mn=Math.min(r,g,b),h2=0,s2=0,l2=(mx+mn)/2;if(mx!==mn){let d=mx-mn;s2=l2>0.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h2=((g-b)/d+(g<b?6:0))/6;break;case g:h2=((b-r)/d+2)/6;break;case b:h2=((r-g)/d+4)/6;break;}}return{h:h2,s:s2,l:l2};}
+function hslToRgb(h,s,l){if(s===0){let v=Math.round(l*255);return{r:v,g:v,b:v};}let q=l<0.5?l*(1+s):l+s-l*s,p=2*l-q;function hue2rgb(p,q,t){if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<0.5)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;}return{r:Math.round(hue2rgb(p,q,h+1/3)*255),g:Math.round(hue2rgb(p,q,h)*255),b:Math.round(hue2rgb(p,q,h-1/3)*255)};}
+
+function buildBasicGrid(){
+  const g=document.getElementById('basic-grid'); g.innerHTML='';
+  basicColors.forEach(c=>{const d=document.createElement('div');d.className='bsw';d.style.background=c;d.onclick=()=>setPickerColor(c);g.appendChild(d);});
+}
+function buildCustomGrid(){
+  const g=document.getElementById('custom-grid'); g.innerHTML='';
+  customColors.forEach((c,i)=>{const d=document.createElement('div');d.className='csw';d.style.background=c;d.onclick=()=>setPickerColor(c);g.appendChild(d);});
+}
+function buildQuickPal(){
+  const g=document.getElementById('quickpal'); g.innerHTML='';
+  quickPalColors.forEach(c=>{const d=document.createElement('div');d.style.cssText=`width:18px;height:18px;border-radius:3px;background:${c};cursor:pointer;border:0.5px solid rgba(0,0,0,.2);flex-shrink:0`;d.onclick=()=>{strokeColor=c;document.getElementById('sc-box').style.background=c;};g.appendChild(d);});
+}
+buildBasicGrid();buildCustomGrid();buildQuickPal();
+
+function buildHueCanvas(){
+  const hc=document.getElementById('hue-canvas');hc.width=18;hc.height=220;
+  const hctx=hc.getContext('2d'),id=hctx.createImageData(18,220);
+  for(let y=0;y<220;y++){let{r,g,b}=hslToRgb(y/220,1,.5);for(let x=0;x<18;x++){let i=(y*18+x)*4;id.data[i]=r;id.data[i+1]=g;id.data[i+2]=b;id.data[i+3]=255;}}
+  hctx.putImageData(id,0,0);
+}
+function buildBriCanvas(){
+  const bc=document.getElementById('bri-canvas');bc.width=14;bc.height=220;
+  const bctx=bc.getContext('2d'),id=bctx.createImageData(14,220);
+  for(let y=0;y<220;y++){let v=Math.round((1-y/220)*255);for(let x=0;x<14;x++){let i=(y*14+x)*4;id.data[i]=v;id.data[i+1]=v;id.data[i+2]=v;id.data[i+3]=255;}}
+  bctx.putImageData(id,0,0);
+}
+function buildGradCanvas(){
+  const pg=document.getElementById('picker-grad');pg.width=220;pg.height=220;
+  const pgc=pg.getContext('2d'),id=pgc.createImageData(220,220);
+  for(let y=0;y<220;y++){for(let x=0;x<220;x++){let s=x/220,l=1-y/220;let{r,g,b}=hslToRgb(pickerH,s,l);let i=(y*220+x)*4;id.data[i]=r;id.data[i+1]=g;id.data[i+2]=b;id.data[i+3]=255;}}
+  pgc.putImageData(id,0,0);
+}
+buildHueCanvas();buildBriCanvas();
+
+function updatePickerUI(){
+  const{r,g,b}=hslToRgb(pickerH,pickerS,pickerL);
+  const hex=rgbToHex(r,g,b);
+  document.getElementById('color-preview').style.background=hex;
+  document.getElementById('pf-h').value=Math.round(pickerH*360);
+  document.getElementById('pf-s').value=Math.round(pickerS*240);
+  document.getElementById('pf-l').value=Math.round(pickerL*240);
+  document.getElementById('pf-r').value=r;
+  document.getElementById('pf-g').value=g;
+  document.getElementById('pf-b').value=b;
+  document.getElementById('hue-cursor').style.top=Math.round(pickerH*220)+'px';
+  document.getElementById('grad-cursor').style.left=Math.round(pickerS*220)+'px';
+  document.getElementById('grad-cursor').style.top=Math.round((1-pickerL)*220)+'px';
+}
+function setPickerColor(hex){
+  const{r,g,b}=hexToRgb(hex);
+  const{h,s,l}=rgbToHsl(r,g,b);
+  pickerH=h;pickerS=s;pickerL=l;
+  buildGradCanvas();updatePickerUI();
+}
+function pickerFromHSL(){
+  pickerH=+document.getElementById('pf-h').value/360;
+  pickerS=+document.getElementById('pf-s').value/240;
+  pickerL=+document.getElementById('pf-l').value/240;
+  buildGradCanvas();updatePickerUI();
+}
+function pickerFromRGB(){
+  const r=+document.getElementById('pf-r').value,g=+document.getElementById('pf-g').value,b=+document.getElementById('pf-b').value;
+  const{h,s,l}=rgbToHsl(r,g,b);pickerH=h;pickerS=s;pickerL=l;
+  buildGradCanvas();updatePickerUI();
+}
+function openPicker(which){
+  pickerFor=which;
+  const src=which==='stroke'?strokeColor:fillColor;
+  setPickerColor(src);
+  buildGradCanvas();
+  pickerOverlay.style.display='flex';
+}
+function closePicker(){pickerOverlay.style.display='none';}
+function pickerOK(){
+  const{r,g,b}=hslToRgb(pickerH,pickerS,pickerL);
+  const hex=rgbToHex(r,g,b);
+  if(pickerFor==='stroke'){strokeColor=hex;document.getElementById('sc-box').style.background=hex;}
+  else{fillColor=hex;document.getElementById('fc-box').style.background=hex;}
+  closePicker();
+}
+function addCustomColor(){
+  const{r,g,b}=hslToRgb(pickerH,pickerS,pickerL);
+  customColors.shift();customColors.push(rgbToHex(r,g,b));
+  buildCustomGrid();
+}
+
+const pg=document.getElementById('picker-grad');
+const hc2=document.getElementById('hue-canvas');
+pg.addEventListener('mousedown',e=>{gradDrag=true;updateGrad(e);});
+pg.addEventListener('mousemove',e=>{if(gradDrag)updateGrad(e);});
+hc2.addEventListener('mousedown',e=>{hueDrag=true;updateHue(e);});
+hc2.addEventListener('mousemove',e=>{if(hueDrag)updateHue(e);});
+document.addEventListener('mouseup',()=>{gradDrag=false;hueDrag=false;});
+function updateGrad(e){const r=pg.getBoundingClientRect();pickerS=Math.max(0,Math.min(1,(e.clientX-r.left)/220));pickerL=Math.max(0,Math.min(1,1-(e.clientY-r.top)/220));updatePickerUI();}
+function updateHue(e){const r=hc2.getBoundingClientRect();pickerH=Math.max(0,Math.min(1,(e.clientY-r.top)/220));buildGradCanvas();updatePickerUI();}
+
+function setTool(t){tool=t;document.querySelectorAll('.tb').forEach(b=>b.classList.remove('act'));const el=document.getElementById('t-'+t);if(el)el.classList.add('act');cv.style.cursor=t==='eraser'?'cell':t==='select'?'default':'crosshair';document.getElementById('st-tool').textContent='Tool: '+t;}
+function toggleFill(){fillMode=!fillMode;const b=document.getElementById('fill-tog');b.textContent='Fill:'+(fillMode?'ON':'OFF');b.style.color=fillMode?'#185FA5':'var(--color-text-secondary)';}
+function toggleGrid(){showGrid=!showGrid;const b=document.getElementById('grid-tog');b.textContent='Grid:'+(showGrid?'ON':'OFF');drawGrid();}
+function zoom(d){zoomLevel=Math.max(.25,Math.min(4,Math.round((zoomLevel+d)*10)/10));document.getElementById('zv').textContent=Math.round(zoomLevel*100)+'%';cv.style.transform=`scale(${zoomLevel})`;cv.style.transformOrigin='top left';gc.style.transform=`scale(${zoomLevel})`;gc.style.transformOrigin='top left';cw.style.width=(700*zoomLevel)+'px';cw.style.height=(520*zoomLevel)+'px';}
+function switchTab(t){document.querySelectorAll('.rt').forEach((el,i)=>el.classList.toggle('act',(i===0&&t==='code')||(i===1&&t==='obj')));document.getElementById('co').style.display=t==='code'?'block':'none';document.getElementById('ol').style.display=t==='obj'?'block':'none';}
+
+function getPos(e){const r=cv.getBoundingClientRect();return{x:Math.round((e.clientX-r.left)/zoomLevel),y:Math.round((e.clientY-r.top)/zoomLevel)};}
+function polyPts(cx,cy,r,n,off){off=off||-Math.PI/2;return Array.from({length:n},(_,i)=>{const a=off+i*2*Math.PI/n;return{x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)};});}
+function starPts(cx,cy,ro,ri,n){const a=[];for(let i=0;i<n*2;i++){const ang=-Math.PI/2+i*Math.PI/n,r=i%2===0?ro:ri;a.push({x:cx+r*Math.cos(ang),y:cy+r*Math.sin(ang)});}return a;}
+
+function drawShapeOnCtx(c,ob,preview){
+  c.save();c.globalAlpha=ob.opacity||1;c.globalCompositeOperation=ob.blend||'source-over';
+  c.strokeStyle=ob.sc;c.fillStyle=ob.fc;c.lineWidth=ob.sz;c.lineCap='round';c.lineJoin='round';
+  const x1=ob.x1,y1=ob.y1,x2=ob.x2,y2=ob.y2;
+  const ox=Math.min(x1,x2),oy=Math.min(y1,y2),ow=Math.abs(x2-x1),oh=Math.abs(y2-y1);
+  const cx=(x1+x2)/2,cy=(y1+y2)/2,rx=ow/2,ry=oh/2,r=Math.max(rx,ry);
+  const t=ob.type;
+  if(t==='pencil'){c.beginPath();(ob.pts||[]).forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.stroke();}
+  else if(t==='eraser'){c.save();c.globalCompositeOperation='destination-out';c.strokeStyle='rgba(0,0,0,1)';c.lineWidth=ob.sz*3;c.beginPath();(ob.pts||[]).forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.stroke();c.restore();}
+  else if(t==='line'){c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();}
+  else if(t==='rect'){if(ob.filled)c.fillRect(ox,oy,ow,oh);c.strokeRect(ox,oy,ow,oh);}
+  else if(t==='rrect'){const rr=Math.min(14,ow/4,oh/4);c.beginPath();c.moveTo(ox+rr,oy);c.lineTo(ox+ow-rr,oy);c.quadraticCurveTo(ox+ow,oy,ox+ow,oy+rr);c.lineTo(ox+ow,oy+oh-rr);c.quadraticCurveTo(ox+ow,oy+oh,ox+ow-rr,oy+oh);c.lineTo(ox+rr,oy+oh);c.quadraticCurveTo(ox,oy+oh,ox,oy+oh-rr);c.lineTo(ox,oy+rr);c.quadraticCurveTo(ox,oy,ox+rr,oy);c.closePath();if(ob.filled)c.fill();c.stroke();}
+  else if(t==='circle'){c.beginPath();c.ellipse(cx,cy,Math.max(1,rx),Math.max(1,ry),0,0,2*Math.PI);if(ob.filled)c.fill();c.stroke();}
+  else if(t==='triangle'){c.beginPath();c.moveTo((x1+x2)/2,y1);c.lineTo(x2,y2);c.lineTo(x1,y2);c.closePath();if(ob.filled)c.fill();c.stroke();}
+  else if(t==='rtriangle'){c.beginPath();c.moveTo(x1,y1);c.lineTo(x1,y2);c.lineTo(x2,y2);c.closePath();if(ob.filled)c.fill();c.stroke();}
+  else if(t==='diamond'){const p=[{x:cx,y:y1},{x:x2,y:cy},{x:cx,y:y2},{x:x1,y:cy}];c.beginPath();p.forEach((pt,i)=>i?c.lineTo(pt.x,pt.y):c.moveTo(pt.x,pt.y));c.closePath();if(ob.filled)c.fill();c.stroke();}
+  else if(['pentagon','hexagon','octagon'].includes(t)){const n=t==='pentagon'?5:t==='hexagon'?6:8;const p=polyPts(cx,cy,r,n);c.beginPath();p.forEach((pt,i)=>i?c.lineTo(pt.x,pt.y):c.moveTo(pt.x,pt.y));c.closePath();if(ob.filled)c.fill();c.stroke();}
+  else if(t==='star'||t==='star6'){const p=t==='star'?starPts(cx,cy,r,r*.4,5):starPts(cx,cy,r,r*.5,6);c.beginPath();p.forEach((pt,i)=>i?c.lineTo(pt.x,pt.y):c.moveTo(pt.x,pt.y));c.closePath();if(ob.filled)c.fill();c.stroke();}
+  else if(t==='parallelogram'){const sk=ow*.25;c.beginPath();c.moveTo(ox+sk,oy);c.lineTo(ox+ow,oy);c.lineTo(ox+ow-sk,oy+oh);c.lineTo(ox,oy+oh);c.closePath();if(ob.filled)c.fill();c.stroke();}
+  else if(t==='arrow'){const aw=Math.min(oh*.5,ow*.35),ah=ow*.3;c.beginPath();c.moveTo(x1,cy-aw/2);c.lineTo(x2-ah,cy-aw/2);c.lineTo(x2-ah,y1);c.lineTo(x2,cy);c.lineTo(x2-ah,y2);c.lineTo(x2-ah,cy+aw/2);c.lineTo(x1,cy+aw/2);c.closePath();if(ob.filled)c.fill();c.stroke();}
+  else if(t==='cross'){const tw=ow/3,th2=oh/3;c.beginPath();c.moveTo(ox+tw,oy);c.lineTo(ox+tw*2,oy);c.lineTo(ox+tw*2,oy+th2);c.lineTo(ox+ow,oy+th2);c.lineTo(ox+ow,oy+th2*2);c.lineTo(ox+tw*2,oy+th2*2);c.lineTo(ox+tw*2,oy+oh);c.lineTo(ox+tw,oy+oh);c.lineTo(ox+tw,oy+th2*2);c.lineTo(ox,oy+th2*2);c.lineTo(ox,oy+th2);c.lineTo(ox+tw,oy+th2);c.closePath();if(ob.filled)c.fill();c.stroke();}
+  else if(t==='heart'){c.beginPath();c.moveTo(cx,cy+oh*.35);c.bezierCurveTo(cx-rx*1.1,cy,cx-rx*1.1,cy-ry*.7,cx,cy-ry*.2);c.bezierCurveTo(cx+rx*1.1,cy-ry*.7,cx+rx*1.1,cy,cx,cy+oh*.35);c.closePath();if(ob.filled)c.fill();c.stroke();}
+  else if(t==='semicircle'){c.beginPath();c.arc(cx,cy,Math.max(1,rx),Math.PI,0);c.lineTo(cx+rx,cy);c.lineTo(cx-rx,cy);c.closePath();if(ob.filled)c.fill();c.stroke();}
+  else if(t==='arc'){c.beginPath();c.moveTo(cx,cy);c.arc(cx,cy,Math.max(1,rx),0,Math.PI*1.5);c.closePath();if(ob.filled)c.fill();c.stroke();}
+  else if(t==='text'){c.font=`${ob.fs||18}px sans-serif`;c.fillStyle=ob.sc;c.fillText(ob.text,ob.x1,ob.y1);}
+  else if(t==='bucket'){} // already applied as pixel op
+  if(!preview&&selectedObj===ob){c.save();c.strokeStyle='#378ADD';c.lineWidth=1;c.setLineDash([4,3]);const pad=7;c.strokeRect(ox-pad,oy-pad,ow+pad*2,oh+pad*2);c.setLineDash([]);c.restore();}
+  c.restore();
+}
+
+function floodFill(px,py,hex){
+  const d=ctx.getImageData(0,0,cv.width,cv.height),data=d.data;
+  const w=cv.width,h=cv.height,idx=(x,y)=>(y*w+x)*4;
+  const i=idx(px,py);const tr=data[i],tg=data[i+1],tb2=data[i+2],ta=data[i+3];
+  const{r:fr,g:fg,b:fb}=hexToRgb(hex);
+  if(tr===fr&&tg===fg&&tb2===fb)return;
+  const stack=[[px,py]],vis=new Uint8Array(w*h);
+  while(stack.length){const[x,y]=stack.pop();if(x<0||x>=w||y<0||y>=h)return;const j=idx(x,y);if(vis[y*w+x]||data[j]!==tr||data[j+1]!==tg||data[j+2]!==tb2||data[j+3]!==ta)continue;vis[y*w+x]=1;data[j]=fr;data[j+1]=fg;data[j+2]=fb;data[j+3]=255;stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);}
+  ctx.putImageData(d,0,0);
+}
+
+function redraw(){
+  ctx.clearRect(0,0,cv.width,cv.height);ctx.fillStyle='white';ctx.fillRect(0,0,cv.width,cv.height);
+  objects.forEach(o=>drawShapeOnCtx(ctx,o,false));drawGrid();
+}
+function redrawWithPrev(prev){
+  ctx.clearRect(0,0,cv.width,cv.height);ctx.fillStyle='white';ctx.fillRect(0,0,cv.width,cv.height);
+  objects.forEach(o=>drawShapeOnCtx(ctx,o,false));
+  if(tool==='pencil'&&pencilPts.length>1){ctx.save();ctx.strokeStyle=strokeColor;ctx.lineWidth=strokeSz;ctx.lineCap='round';ctx.lineJoin='round';ctx.globalAlpha=opVal;ctx.globalCompositeOperation=blendMode;ctx.beginPath();pencilPts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();ctx.restore();}
+  if(tool==='eraser'&&pencilPts.length>1){ctx.save();ctx.globalCompositeOperation='destination-out';ctx.strokeStyle='rgba(0,0,0,1)';ctx.lineWidth=strokeSz*3;ctx.lineCap='round';ctx.beginPath();pencilPts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();ctx.restore();}
+  if(prev){const ob={...prev,type:tool,sc:strokeColor,fc:fillColor,sz:strokeSz,opacity:opVal,filled:fillMode,blend:blendMode};ctx.save();ctx.setLineDash([5,4]);drawShapeOnCtx(ctx,ob,true);ctx.setLineDash([]);ctx.restore();}
+  drawGrid();
+}
+function drawGrid(){gctx.clearRect(0,0,gc.width,gc.height);if(!showGrid)return;gctx.strokeStyle='rgba(0,120,255,.18)';gctx.lineWidth=0.5;for(let x=0;x<gc.width;x+=20){gctx.beginPath();gctx.moveTo(x,0);gctx.lineTo(x,gc.height);gctx.stroke();}for(let y=0;y<gc.height;y+=20){gctx.beginPath();gctx.moveTo(0,y);gctx.lineTo(gc.width,y);gctx.stroke();}}
+
+function undoLast(){if(objects.length){objects.pop();redraw();generateCode();updateObjList();updateStatus();}}
+function clearAll(){objects=[];selectedObj=null;ctx.clearRect(0,0,cv.width,cv.height);ctx.fillStyle='white';ctx.fillRect(0,0,cv.width,cv.height);generateCode();updateObjList();updateStatus();}
+function updateStatus(){document.getElementById('st-obj').textContent=objects.length+' objects';document.getElementById('st-blend').textContent='Blend: '+document.getElementById('blendsel').options[document.getElementById('blendsel').selectedIndex].text;}
+
+cv.addEventListener('mousedown',e=>{
+  const p=getPos(e);
+  if(tool==='bucket'){floodFill(p.x,p.y,fillColor);objects.push({type:'bucket',x1:p.x,y1:p.y,x2:p.x,y2:p.y,sc:fillColor,fc:fillColor,sz:1,opacity:opVal,filled:true,blend:blendMode});generateCode();updateObjList();updateStatus();return;}
+  if(tool==='text'){textPending={x:p.x,y:p.y};const cr=cv.getBoundingClientRect();ti.style.left=(p.x*zoomLevel)+'px';ti.style.top=((p.y-20)*zoomLevel)+'px';ti.style.display='block';ti.style.color=strokeColor;ti.style.fontSize=Math.max(14,strokeSz*4)+'px';ti.value='';ti.focus();return;}
+  if(tool==='select'){selectedObj=null;for(let i=objects.length-1;i>=0;i--){const o=objects[i];const ox=Math.min(o.x1,o.x2)-8,oy=Math.min(o.y1,o.y2)-8,ow=Math.abs(o.x2-o.x1)+16,oh=Math.abs(o.y2-o.y1)+16;if(p.x>=ox&&p.x<=ox+ow&&p.y>=oy&&p.y<=oy+oh){selectedObj=o;dragOff={dx:p.x-Math.min(o.x1,o.x2),dy:p.y-Math.min(o.y1,o.y2)};break;}}drawing=!!selectedObj;redraw();return;}
+  drawing=true;startX=p.x;startY=p.y;if(tool==='pencil'||tool==='eraser')pencilPts=[{x:p.x,y:p.y}];
+});
+cv.addEventListener('mousemove',e=>{
+  const p=getPos(e);document.getElementById('st-pos').textContent='x:'+p.x+' y:'+p.y;
+  if(!drawing)return;
+  if(tool==='select'&&selectedObj){const dxd=p.x-dragOff.dx-Math.min(selectedObj.x1,selectedObj.x2),dyd=p.y-dragOff.dy-Math.min(selectedObj.y1,selectedObj.y2);selectedObj.x1+=dxd;selectedObj.y1+=dyd;selectedObj.x2+=dxd;selectedObj.y2+=dyd;dragOff.dx=p.x-Math.min(selectedObj.x1,selectedObj.x2);dragOff.dy=p.y-Math.min(selectedObj.y1,selectedObj.y2);redraw();generateCode();return;}
+  if(tool==='pencil'||tool==='eraser'){pencilPts.push({x:p.x,y:p.y});redrawWithPrev(null);}
+  else redrawWithPrev({x1:startX,y1:startY,x2:p.x,y2:p.y});
+});
+cv.addEventListener('mouseup',e=>{
+  if(!drawing)return;drawing=false;const p=getPos(e);
+  if(tool==='select'){dragOff=null;return;}
+  if(tool==='text'||tool==='bucket')return;
+  if(tool==='pencil'||tool==='eraser'){if(pencilPts.length>1)objects.push({type:tool,pts:[...pencilPts],x1:pencilPts[0].x,y1:pencilPts[0].y,x2:pencilPts[pencilPts.length-1].x,y2:pencilPts[pencilPts.length-1].y,sc:tool==='eraser'?'white':strokeColor,fc:fillColor,sz:strokeSz,opacity:opVal,filled:false,blend:blendMode});pencilPts=[];redraw();generateCode();updateObjList();updateStatus();return;}
+  const x1=startX,y1=startY,x2=p.x,y2=p.y;
+  if(Math.abs(x2-x1)<3&&Math.abs(y2-y1)<3){redraw();return;}
+  const ob={type:tool,x1,y1,x2,y2,sc:strokeColor,fc:fillColor,sz:strokeSz,opacity:opVal,filled:fillMode,blend:blendMode};
+  objects.push(ob);redraw();generateCode();updateObjList();updateStatus();
+});
+function commitText(){if(!textPending)return;const val=ti.value.trim();ti.style.display='none';if(val){const fs=Math.max(14,strokeSz*4);const ob={type:'text',x1:textPending.x,y1:textPending.y,x2:textPending.x+120,y2:textPending.y-fs,sc:strokeColor,fc:fillColor,sz:strokeSz,opacity:opVal,filled:false,blend:blendMode,text:val,fs};objects.push(ob);redraw();generateCode();updateObjList();updateStatus();}textPending=null;ti.value='';}
+
+function updateObjList(){
+  const l=document.getElementById('ol');l.innerHTML='';
+  objects.forEach((ob,i)=>{const d=document.createElement('div');d.style.cssText='padding:4px 8px;border-radius:4px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--color-text-secondary)';if(selectedObj===ob)d.style.background='var(--color-background-primary)';const dot=document.createElement('div');dot.style.cssText=`width:10px;height:10px;border-radius:2px;background:${ob.sc};flex-shrink:0`;const lbl=document.createElement('span');lbl.textContent=`#${i+1} ${ob.type}`;d.appendChild(dot);d.appendChild(lbl);d.onclick=()=>{selectedObj=ob;redraw();updateObjList();};l.appendChild(d);});
+}
+
+function sfmlColor(hex,alpha){const{r,g,b}=hexToRgb(hex);const a=alpha<1?','+Math.round(alpha*255):'';return `sf::Color(${r},${g},${b}${a})`;}
+function pv(n){return Math.round(n);}
+function generateCode(){
+  if(objects.length===0){document.getElementById('co').innerHTML='<span style="color:var(--color-text-secondary);font-style:italic">// Draw on canvas\n// SFML code appears here!</span>';return;}
+  const needFont=objects.some(o=>o.type==='text');
+  const blendMap={'source-over':'sf::BlendAlpha','multiply':'sf::BlendMultiply','screen':'sf::BlendMultiply','lighter':'sf::BlendAdd','overlay':'sf::BlendAlpha','darken':'sf::BlendAlpha'};
+  const L=[];
+  L.push('<span class="c-cm">// SFML Paint Pro — Generated</span>');
+  L.push('<span class="c-kw">#include</span> <span class="c-str">&lt;SFML/Graphics.hpp&gt;</span>');
+  if(needFont)L.push('<span class="c-kw">#include</span> <span class="c-str">&lt;string&gt;</span>');
+  L.push('');
+  L.push('<span class="c-ty">int</span> <span class="c-fn">main</span>() {');
+  L.push('    sf::RenderWindow window(sf::VideoMode(<span class="c-nm">700</span>,<span class="c-nm">520</span>),<span class="c-str">"Output"</span>);');
+  L.push('    window.setFramerateLimit(<span class="c-nm">60</span>);');
+  if(needFont){L.push('    sf::Font font;');L.push('    font.loadFromFile(<span class="c-str">"arial.ttf"</span>);');}
+  L.push('');
+  objects.forEach((ob,i)=>{
+    const id=ob.type+i,t=ob.type;
+    const x1=pv(ob.x1),y1=pv(ob.y1),x2=pv(ob.x2),y2=pv(ob.y2);
+    const ox=Math.min(x1,x2),oy=Math.min(y1,y2),ow=Math.abs(x2-x1),oh=Math.abs(y2-y1);
+    const cx=pv((x1+x2)/2),cy=pv((y1+y2)/2),rx=pv(Math.abs(x2-x1)/2),ry=pv(Math.abs(y2-y1)/2);
+    const sc2=sfmlColor(ob.sc,ob.opacity),fc2=sfmlColor(ob.fc,ob.opacity);
+    const bm=blendMap[ob.blend]||'sf::BlendAlpha';
+    const filled=ob.filled?fc2:'sf::Color::Transparent';
+    L.push(`    <span class="c-cm">// #${i} ${t} blend=${ob.blend}</span>`);
+    if(t==='rect'){
+      L.push(`    sf::RectangleShape ${id}(sf::Vector2f(<span class="c-nm">${ow}f</span>,<span class="c-nm">${oh}f</span>));`);
+      L.push(`    ${id}.setPosition(<span class="c-nm">${ox}f</span>,<span class="c-nm">${oy}f</span>); ${id}.setOutlineThickness(<span class="c-nm">${ob.sz}f</span>);`);
+      L.push(`    ${id}.setOutlineColor(${sc2}); ${id}.setFillColor(${filled});`);
+    } else if(t==='circle'){
+      L.push(`    sf::CircleShape ${id}(<span class="c-nm">${rx}f</span>);`);
+      L.push(`    ${id}.setOrigin(<span class="c-nm">${rx}f</span>,<span class="c-nm">${rx}f</span>); ${id}.setPosition(<span class="c-nm">${cx}f</span>,<span class="c-nm">${cy}f</span>);`);
+      if(rx!==ry)L.push(`    ${id}.setScale(<span class="c-nm">1.0f</span>,<span class="c-nm">${(ry/Math.max(rx,1)).toFixed(2)}f</span>);`);
+      L.push(`    ${id}.setOutlineThickness(<span class="c-nm">${ob.sz}f</span>); ${id}.setOutlineColor(${sc2}); ${id}.setFillColor(${filled});`);
+    } else if(t==='line'){
+      const dx=x2-x1,dy=y2-y1,len=pv(Math.sqrt(dx*dx+dy*dy)),ang=(Math.atan2(dy,dx)*180/Math.PI).toFixed(1);
+      L.push(`    sf::RectangleShape ${id}(sf::Vector2f(<span class="c-nm">${len}f</span>,<span class="c-nm">${ob.sz}f</span>));`);
+      L.push(`    ${id}.setPosition(<span class="c-nm">${x1}f</span>,<span class="c-nm">${y1}f</span>); ${id}.setRotation(<span class="c-nm">${ang}f</span>); ${id}.setFillColor(${sc2});`);
+    } else if(t==='text'){
+      L.push(`    sf::Text ${id}; ${id}.setFont(font); ${id}.setString(<span class="c-str">"${(ob.text||'').replace(/"/g,'\\"')}"</span>);`);
+      L.push(`    ${id}.setCharacterSize(<span class="c-nm">${ob.fs||18}</span>); ${id}.setFillColor(${sc2}); ${id}.setPosition(<span class="c-nm">${x1}f</span>,<span class="c-nm">${y1-(ob.fs||18)}f</span>);`);
+    } else if(t==='pencil'||t==='eraser'){
+      const pts=ob.pts||[];L.push(`    sf::VertexArray ${id}(sf::LinesStrip,<span class="c-nm">${pts.length}</span>);`);
+      pts.slice(0,8).forEach((p,k)=>L.push(`    ${id}[<span class="c-nm">${k}</span>]=sf::Vertex(sf::Vector2f(<span class="c-nm">${pv(p.x)}f</span>,<span class="c-nm">${pv(p.y)}f</span>),${t==='eraser'?'sf::Color::White':sc2});`));
+      if(pts.length>8)L.push(`    <span class="c-cm">// ...${pts.length-8} more points</span>`);
+    } else if(t==='bucket'){
+      L.push(`    <span class="c-cm">// Flood fill at (${x1},${y1}) color=${sc2}</span>`);
+    } else {
+      const pts3=t==='pentagon'?5:t==='hexagon'?6:t==='octagon'?8:t==='star'?10:t==='star6'?12:4;
+      L.push(`    sf::ConvexShape ${id}(<span class="c-nm">${pts3}</span>); <span class="c-cm">// ${t} at (${ox},${oy}) ${ow}x${oh}</span>`);
+      L.push(`    ${id}.setOutlineThickness(<span class="c-nm">${ob.sz}f</span>); ${id}.setOutlineColor(${sc2}); ${id}.setFillColor(${filled});`);
+    }
+    L.push(`    <span class="c-cm">// blend: window.draw(${id}, ${bm});</span>`);
+    L.push('');
+  });
+  L.push('    <span class="c-kw">while</span>(window.isOpen()) {');
+  L.push('        sf::Event ev; <span class="c-kw">while</span>(window.pollEvent(ev))');
+  L.push('            <span class="c-kw">if</span>(ev.type==sf::Event::Closed) window.close();');
+  L.push('        window.clear(sf::Color::White);');
+  objects.forEach((_,i)=>L.push(`        window.draw(${objects[i].type+i});`));
+  L.push('        window.display();\n    }\n    <span class="c-kw">return</span> <span class="c-nm">0</span>;\n}');
+  document.getElementById('co').innerHTML=L.join('\n');
+}
+function copyCode(){const raw=document.getElementById('co').innerText;navigator.clipboard.writeText(raw).then(()=>{const b=document.querySelector('.rb');const o=b.textContent;b.textContent='Copied!';setTimeout(()=>b.textContent=o,1500);});}
+function downloadCode(){const raw=document.getElementById('co').innerText;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([raw],{type:'text/plain'}));a.download='sfml_paint_pro.cpp';a.click();}
+
+redraw();generateCode();
+</script>

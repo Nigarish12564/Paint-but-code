@@ -38,7 +38,6 @@ This application is designed to make graphical design in **SFML** easier and mor
 Instead of manually writing code for every visual element, users can draw directly on the screen and use the generated code as a starting point for their own projects.
 
 It can be useful for:
-- Beginners learning SFML
 - Students working on graphics-based projects
 - Developers who want to prototype 2D visuals more efficiently
 
@@ -50,8 +49,7 @@ It can be useful for:
 - **SFML (Simple and Fast Multimedia Library)**
 
 ##How to install 
-- Install .cpp file
-- Install dependencies
-- run it on vs code with the command: "g++ -g "filename.cpp" -o paint_sfml -lsfml-graphics -lsfml-window -lsfml-system"
-- Simply run the application
+- Install the .zip file for your OS. I have made this tool for linux and windows
+- Simply run the sfml_paint_pro on linux and sfml_paint_pro.exe on windows
+  
 
